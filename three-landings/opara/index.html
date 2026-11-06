@@ -1,0 +1,976 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Опара — домашний хлеб</title>
+<meta name="description" content="Домашний хлеб на живой закваске. Печём ночью — к завтраку он ещё тёплый.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@200;300;400;500&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="assets/bread-stack-2.webp">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<style>
+:root{
+  --ink-0:#0b0b0c;
+  --ink-1:#131315;
+  --ink-2:#1b1b1e;
+  --ink-3:#26262a;
+  --line:rgba(239,233,223,.12);
+  --line-strong:rgba(239,233,223,.28);
+  --flour:#efe9df;
+  --flour-dim:#d8d1c6;
+  --muted:#a39b90;
+  --crust:#9a5422;
+  --crust-hi:#b4682f;
+  --crust-ink:#fff6ec;
+  --glow:rgba(196,120,52,.24);
+  /* one fluid unit: 1px of the design at ~1250px wide, grows with the screen */
+  --u:min(clamp(.9px,.08vw,1.75px),.125vh);
+  --radius:calc(var(--u)*28);
+  --gutter:clamp(16px,calc(var(--u)*56),110px);
+  --ease:cubic-bezier(.16,1,.3,1);
+  --font:"Onest",ui-sans-serif,system-ui,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{background:var(--ink-0);color-scheme:dark;scrollbar-color:var(--ink-3) var(--ink-0)}
+body{margin:0;background:var(--ink-0);color:var(--flour);font-family:var(--font);font-weight:300;font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:clip}
+::selection{background:var(--crust);color:var(--crust-ink)}
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-track{background:var(--ink-0)}
+::-webkit-scrollbar-thumb{background:var(--ink-3);border-radius:10px;border:2px solid var(--ink-0)}
+:focus-visible{outline:2px solid var(--flour);outline-offset:3px;border-radius:999px}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+/* film grain over everything */
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.07;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* ───────── HERO (pinned; the page slides over it) ───────── */
+.hero-wrap{padding:12px;position:sticky;top:0;z-index:0}
+.hero{
+  --p:0;
+  position:relative;isolation:isolate;overflow:hidden;
+  height:max(calc(100svh - 24px),calc(var(--u)*760));
+  border-radius:var(--radius);
+  background:
+    radial-gradient(60% 55% at 50% 46%, var(--glow), transparent 70%),
+    radial-gradient(120% 80% at 50% 120%, #1d1a18 0%, transparent 60%),
+    linear-gradient(180deg,#18181b 0%,#121214 55%,#0f0f11 100%);
+  display:grid;grid-template-rows:auto minmax(0,1fr);
+}
+.hero::before{ /* the stove, far behind the bread: dim, soft, fading into the dark */
+  content:"";position:absolute;top:0;right:0;bottom:0;width:62%;z-index:0;pointer-events:none;
+  background:url("assets/stove.webp") 52% 50%/cover no-repeat;
+  opacity:.4;filter:brightness(.62) saturate(.85) blur(1.5px);
+  -webkit-mask:linear-gradient(90deg,transparent,#000 50%),linear-gradient(180deg,transparent,#000 22%,#000 70%,transparent);-webkit-mask-composite:source-in;
+  mask:linear-gradient(90deg,transparent,#000 50%),linear-gradient(180deg,transparent,#000 22%,#000 70%,transparent);mask-composite:intersect;
+  transform:translate3d(0,calc(var(--p)*-6vh),0) scale(1.04)}
+.hero::after{ /* dims as the next section covers it */
+  content:"";position:absolute;inset:0;z-index:20;pointer-events:none;background:var(--ink-0);opacity:calc(var(--p)*.85)}
+
+/* nav */
+.nav{display:flex;align-items:center;padding:calc(var(--u)*30) var(--gutter) 0;position:relative;z-index:8}
+.nav__links{display:flex;align-items:center;gap:calc(var(--u)*56);margin-left:calc(var(--u)*80)}
+.nav .btn{margin-left:auto}
+.btn{position:relative}
+.count{position:absolute;top:calc(var(--u)*-8);right:calc(var(--u)*-8);min-width:calc(var(--u)*22);height:calc(var(--u)*22);padding:0 calc(var(--u)*6);border-radius:999px;display:grid;place-items:center;background:var(--crust);color:var(--crust-ink);font-size:calc(var(--u)*12);font-weight:600;line-height:1;box-shadow:0 0 0 calc(var(--u)*3) var(--ink-1);transform:scale(0);transition:transform .35s var(--ease)}
+.count.on{transform:scale(1)}
+.motion .count.bump{animation:bump .4s var(--ease)}
+@keyframes bump{50%{transform:scale(1.3)}}
+.nav a.link{font-size:calc(var(--u)*15);font-weight:400;color:var(--flour-dim);letter-spacing:.01em;padding:6px 0;position:relative;transition:color .3s var(--ease)}
+.nav a.link::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease)}
+.nav a.link:hover{color:var(--flour)}
+.nav a.link:hover::after{transform:scaleX(1)}
+.burger{width:calc(var(--u)*40);height:calc(var(--u)*40);display:none;place-content:center;gap:calc(var(--u)*8);margin-left:-6px}
+.burger span{display:block;width:calc(var(--u)*26);height:1.5px;background:var(--flour);border-radius:2px;transition:width .4s var(--ease)}
+.burger span:last-child{width:calc(var(--u)*16)}
+.burger:hover span:last-child{width:calc(var(--u)*26)}
+.logo{display:flex;align-items:center}
+.logo{flex-shrink:0}
+.logo img{display:block;height:calc(var(--u)*52);width:auto;max-width:none}
+.btn{display:inline-flex;align-items:center;gap:calc(var(--u)*11);height:calc(var(--u)*48);padding:0 calc(var(--u)*24);border-radius:calc(var(--u)*11);background:var(--flour);color:var(--ink-1);font-size:calc(var(--u)*15);font-weight:500;letter-spacing:.01em;white-space:nowrap;transition:background .3s var(--ease),transform .3s var(--ease)}
+.btn:hover{background:#fff}
+.btn:active{transform:scale(.97)}
+.btn svg{width:calc(var(--u)*15);height:calc(var(--u)*15);transition:transform .4s var(--ease)}
+.btn:hover svg{transform:translate(2px,-2px)}
+
+/* main row */
+.main{display:grid;grid-template-columns:minmax(0,1.2fr) auto minmax(0,.8fr);grid-template-rows:auto minmax(0,1fr);grid-template-areas:"head stage side" "facts stage side";align-items:start;min-height:0;padding:0 var(--gutter);position:relative;z-index:2}
+.headline{grid-area:head;align-self:start;margin:0;padding-top:calc(var(--u)*44);position:relative;z-index:3;
+  transform:translate3d(0,calc(var(--p)*-34vh),0);filter:blur(calc(var(--p)*14px));opacity:calc(1 - var(--p)*1.6)}
+.headline h1{margin:0;font-weight:200;text-transform:uppercase;font-size:calc(var(--u)*94);line-height:.94;letter-spacing:-.04em;color:var(--flour);white-space:nowrap}
+.headline h1 span{display:block;width:max-content;overflow:hidden;padding:.2em 0 .04em;margin-top:-.2em}
+.headline h1 span i{display:block;font-style:normal}
+.headline h1 span:nth-child(2){padding-left:.3em}
+.headline p{margin:calc(var(--u)*30) 0 0 .1em;max-width:32ch;color:var(--muted);font-size:calc(var(--u)*18);line-height:1.6}
+
+/* product stage */
+.stage{grid-area:stage;position:relative;--sh:clamp(calc(var(--u)*760),calc(100svh - 24px - calc(var(--u)*28)),calc(var(--u)*820));height:var(--sh);aspect-ratio:750/1125;margin:calc(var(--u)*20) calc(var(--u)*-30) calc(var(--sh)*-1);justify-self:center;z-index:2;
+  transform:translate3d(0,calc(var(--p)*-12vh),0) scale(calc(1 + var(--p)*.14));transform-origin:50% 70%}
+.stage__shadow{position:absolute;left:6%;right:4%;bottom:-3%;height:9%;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.85),transparent);filter:blur(8px);z-index:0}
+.stage__rim{position:absolute;inset:4% -10% 8%;z-index:-1;border-radius:50%;background:radial-gradient(closest-side,rgba(214,140,70,.22),transparent);filter:blur(40px)}
+/* the shadow lives on the wrapper so the image mask can never clip it into a box */
+.stage__bread{position:relative;z-index:1;width:100%;height:100%;filter:drop-shadow(0 calc(var(--u)*30) calc(var(--u)*40) rgba(0,0,0,.5))}
+.stage__img{width:100%;height:100%;object-fit:contain;
+  filter:contrast(1.04) saturate(1.04)}
+/* oversized canvas with feathered edges: puffs pushed by the cursor never hit a visible boundary */
+.steam{position:absolute;z-index:3;pointer-events:none;left:-95%;width:290%;top:-95%;height:160%;
+  -webkit-mask:linear-gradient(90deg,transparent,#000 22%,#000 78%,transparent),linear-gradient(180deg,transparent,#000 18%,#000 70%,transparent);-webkit-mask-composite:source-in;
+  mask:linear-gradient(90deg,transparent,#000 22%,#000 78%,transparent),linear-gradient(180deg,transparent,#000 18%,#000 70%,transparent);mask-composite:intersect}
+
+/* callouts */
+.callouts{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:calc(1 - var(--p)*3)}
+.co{position:absolute;inset:0}
+.hero.scrolled .callouts{visibility:hidden}
+.co1{--x:46;--y:21;--tx:72;--ty:3;--d:1.5s}
+.co2{--x:78;--y:53;--tx:100;--ty:42;--d:1.7s}
+.co3{--x:12;--y:52;--tx:0;--ty:57;--d:1.9s;--sx:16px}
+.leader{position:absolute;left:0;top:0;width:0;height:1px;transform-origin:0 50%}
+.leader i{display:block;height:100%;background:rgba(239,233,223,.45);transform-origin:0 50%}
+.co .dot{left:calc(var(--x)*1%);top:calc(var(--y)*1%)}
+.co .tag{left:calc(var(--tx)*1%);top:calc(var(--ty)*1%)}
+.dot{position:absolute;width:calc(var(--u)*26);height:calc(var(--u)*26);transform:translate(-50%,-50%);border-radius:50%;border:1px solid rgba(239,233,223,.55);background:rgba(20,20,22,.35);backdrop-filter:blur(3px);display:grid;place-items:center}
+.dot::after{content:"";width:calc(var(--u)*7);height:calc(var(--u)*7);border-radius:50%;background:var(--flour);box-shadow:0 0 0 calc(var(--u)*4) rgba(239,233,223,.12)}
+.tag{position:absolute;display:inline-flex;align-items:center;gap:calc(var(--u)*9);white-space:nowrap;font-size:calc(var(--u)*14);font-weight:400;color:var(--flour-dim);padding:calc(var(--u)*8) calc(var(--u)*12) calc(var(--u)*8) calc(var(--u)*15);border-radius:999px;border:1px solid var(--line-strong);background:rgba(16,16,18,.55);backdrop-filter:blur(8px);transform:translateY(-50%);pointer-events:auto;cursor:pointer;
+  transition:background .4s var(--ease),color .4s var(--ease),border-color .4s var(--ease)}
+.tag svg{width:calc(var(--u)*11);height:calc(var(--u)*11);opacity:.7;transition:transform .5s var(--ease),opacity .3s}
+.tag--l{transform:translate(-100%,-50%)}
+.dot{transition:scale .5s var(--ease)}
+.leader i{transition:background .4s var(--ease)}
+
+/* callout panels: unfold from the label on hover / focus / tap */
+.stage:has(.co:hover,.co.open,.co:focus-within){z-index:6}
+.co:hover .tag,.co.open .tag,.co:focus-within .tag{background:var(--flour);color:var(--ink-1);border-color:var(--flour)}
+.co:hover .tag svg,.co.open .tag svg,.co:focus-within .tag svg{transform:rotate(45deg);opacity:1}
+.co:hover .dot,.co.open .dot,.co:focus-within .dot{scale:1.3}
+.co:hover .leader i,.co.open .leader i,.co:focus-within .leader i{background:var(--flour)}
+.panel{--gap:calc(var(--u)*24);position:absolute;z-index:2;width:calc(var(--u)*210);left:calc(var(--tx)*1%);top:calc(var(--ty)*1% + var(--gap));
+  border-radius:calc(var(--u)*18);overflow:hidden;background:rgba(22,22,24,.94);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line-strong);box-shadow:0 30px 60px -20px rgba(0,0,0,.75);
+  opacity:0;clip-path:inset(0 0 100% 0 round calc(var(--u)*18));pointer-events:none;
+  transition:clip-path .7s var(--ease),opacity .35s var(--ease)}
+.panel--up{left:auto;top:auto;right:calc((100 - var(--tx))*1%);bottom:calc((100 - var(--ty))*1% + var(--gap));clip-path:inset(100% 0 0 0 round calc(var(--u)*18))}
+.panel::before{content:"";position:absolute;left:0;right:0;top:calc(var(--gap)*-1);height:var(--gap)} /* hover bridge to the label */
+.panel--up::before{top:auto;bottom:calc(var(--gap)*-1)}
+.panel figure{margin:0;height:calc(var(--u)*176);overflow:hidden}
+.panel figure img{width:100%;height:100%;object-fit:cover;transform:scale(1.18);transition:transform 1.4s var(--ease)}
+.panel__txt{padding:calc(var(--u)*11) calc(var(--u)*14) calc(var(--u)*13)}
+.panel__txt>*{opacity:0;translate:0 8px;transition:opacity .5s var(--ease),translate .6s var(--ease)}
+.panel p{margin:0;font-size:calc(var(--u)*14);line-height:1.4;color:var(--flour-dim);white-space:normal}
+.co:hover .panel,.co.open .panel,.co:focus-within .panel{opacity:1;clip-path:inset(0 round calc(var(--u)*18));pointer-events:auto}
+.co:hover .panel img,.co.open .panel img,.co:focus-within .panel img{transform:scale(1)}
+.co:hover .panel__txt>*,.co.open .panel__txt>*,.co:focus-within .panel__txt>*{opacity:1;translate:0 0}
+
+/* right column */
+.side{grid-area:side;position:relative;align-self:stretch;justify-self:end;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;padding:calc(var(--u)*20) 0 calc(var(--u)*34);z-index:3;
+  transform:translate3d(0,calc(var(--p)*-46vh),0)}
+
+.ring{position:relative;width:calc(var(--u)*120);height:calc(var(--u)*120);border-radius:50%;display:grid;place-items:center;
+  transform:rotate(calc(var(--p)*220deg))}
+.ring::before{content:"";position:absolute;inset:0;border-radius:50%;
+  background:repeating-conic-gradient(rgba(239,233,223,.55) 0 1.2deg,transparent 1.2deg 6deg);
+  -webkit-mask:radial-gradient(closest-side,transparent 82%,#000 83%,#000 100%);mask:radial-gradient(closest-side,transparent 82%,#000 83%,#000 100%);
+  transition:transform 1.4s var(--ease)}
+.ring::after{content:"";position:absolute;inset:calc(var(--u)*18);border-radius:50%;border:1px solid var(--line-strong);transition:background .4s var(--ease),border-color .4s var(--ease)}
+.ring svg{width:calc(var(--u)*26);height:calc(var(--u)*26);position:relative;z-index:1;transform:rotate(90deg);transition:transform .5s var(--ease)}
+.ring:hover::before{transform:rotate(60deg)}
+.ring:hover::after{background:var(--flour);border-color:var(--flour)}
+.ring:hover svg{transform:rotate(90deg) translate(calc(var(--u)*3),calc(var(--u)*-3));color:var(--ink-1)}
+
+.night{width:calc(var(--u)*226);border-radius:calc(var(--u)*18);background:var(--crust);color:var(--crust-ink);overflow:hidden;box-shadow:0 24px 50px -20px rgba(0,0,0,.6)}
+.night h2{margin:0;padding:calc(var(--u)*19) calc(var(--u)*19) calc(var(--u)*14);font-size:calc(var(--u)*19);font-weight:400;line-height:1.25;letter-spacing:-.01em}
+.night figure{margin:0 calc(var(--u)*14);height:calc(var(--u)*88);border-radius:calc(var(--u)*11);overflow:hidden}
+.night figure img{width:100%;height:100%;object-fit:cover;transform:scale(1.02);transition:transform 1.2s var(--ease)}
+.night:hover figure img{transform:scale(1.08)}
+.night footer{display:grid;align-content:start;gap:calc(var(--u)*10);margin-top:calc(var(--u)*14);padding:calc(var(--u)*14) calc(var(--u)*19) calc(var(--u)*17);border-top:1px solid rgba(255,246,236,.2);font-size:calc(var(--u)*13);line-height:1.35;color:rgba(255,246,236,.82)}
+.night footer p{display:flex;gap:calc(var(--u)*11);align-items:flex-start;margin:0}
+.night footer b{display:block;font-weight:500;font-size:calc(var(--u)*16);color:var(--crust-ink)}
+.night footer svg{flex:none;width:calc(var(--u)*18);height:calc(var(--u)*18);margin-top:1px}
+
+/* bottom bar */
+.facts{grid-area:facts;align-self:end;justify-self:start;display:grid;grid-template-columns:calc(var(--u)*180) calc(var(--u)*196);gap:calc(var(--u)*12);margin-bottom:calc(var(--u)*34);position:relative;z-index:3;transform:translate3d(0,calc(var(--p)*-26vh),0);opacity:calc(1 - var(--p)*1.4)}
+.slow{height:calc(var(--u)*178);background:var(--crust);color:var(--crust-ink);border-radius:calc(var(--u)*20);padding:calc(var(--u)*16) calc(var(--u)*18) calc(var(--u)*18);display:flex;flex-direction:column;justify-content:space-between}
+.slow__top{display:flex;justify-content:space-between;align-items:flex-start;font-size:calc(var(--u)*12);line-height:1.3;color:rgba(255,246,236,.82)}
+.slow__thumb{width:calc(var(--u)*54);height:calc(var(--u)*54);border-radius:50%;overflow:hidden;box-shadow:0 0 0 1px rgba(255,246,236,.35),0 0 0 calc(var(--u)*6) rgba(255,246,236,.08)}
+.slow__thumb img{width:100%;height:100%;object-fit:cover}
+.slow__num{font-weight:200;font-size:calc(var(--u)*46);line-height:1;letter-spacing:-.04em}
+.slow__num small{font-size:calc(var(--u)*15);font-weight:400;letter-spacing:0;margin-left:6px}
+.slow__cap{font-size:calc(var(--u)*13);color:rgba(255,246,236,.9);margin-top:4px}
+.about{height:calc(var(--u)*178);background:var(--flour);color:var(--ink-1);border-radius:calc(var(--u)*20);display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:calc(var(--u)*16) calc(var(--u)*18)}
+.about a{display:inline-flex;align-items:center;gap:6px;font-size:calc(var(--u)*12);font-weight:500;color:#3b3631;padding:2px 0}
+.about a svg{width:calc(var(--u)*12);height:calc(var(--u)*12)}
+.about p{margin:0;font-size:calc(var(--u)*15);font-weight:400;line-height:1.3;letter-spacing:-.01em;text-wrap:balance}
+.rating{display:flex;align-items:center;gap:calc(var(--u)*10)}
+.faces{display:flex}
+.faces span{width:calc(var(--u)*28);height:calc(var(--u)*28);border-radius:50%;display:grid;place-items:center;font-size:calc(var(--u)*11);font-weight:500;border:2px solid var(--flour)}
+.faces span:nth-child(1){background:#d9c3a5;color:#3d2c19}
+.faces span:nth-child(2){background:#7a4a28;color:#fff3e6;margin-left:calc(var(--u)*-8)}
+.faces span:nth-child(3){background:#33302c;color:var(--flour);margin-left:calc(var(--u)*-8);overflow:hidden}
+.faces img{width:100%;height:100%;object-fit:cover}
+.score{display:flex;align-items:flex-start;gap:calc(var(--u)*4)}
+.score b{font-weight:300;font-size:calc(var(--u)*30);line-height:1;letter-spacing:-.04em}
+.score svg{width:calc(var(--u)*11);height:calc(var(--u)*11);color:var(--crust);margin-top:3px}
+
+/* entrance — once, on load */
+@media (prefers-reduced-motion:no-preference){
+  .headline h1 span i{animation:rise 1.3s var(--ease) both}
+  .headline h1 span:nth-child(2) i{animation-delay:.08s}
+  .headline h1 span:nth-child(3) i{animation-delay:.16s}
+  .headline p{animation:fade 1.2s .5s var(--ease) both}
+  .stage__img{animation:bake 1.8s .1s var(--ease) both}
+  /* callouts arrive after the loaf has landed: dot, then the line draws out, then the label */
+  .co .dot{animation:pop .5s var(--d) var(--ease) both}
+  .co .leader i{animation:grow .5s calc(var(--d) + .15s) var(--ease) both}
+  .co .tag{animation:tagIn .6s calc(var(--d) + .4s) var(--ease) both}
+  .side>*,.facts>*{animation:fade 1.2s .7s var(--ease) both}
+}
+@keyframes rise{from{transform:translateY(105%)}to{transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes pop{from{opacity:0;transform:translate(-50%,-50%) scale(.3)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes tagIn{from{opacity:0;filter:blur(6px);translate:var(--sx,-16px) 0}to{opacity:1;filter:none;translate:0 0}}
+@keyframes bake{from{opacity:0;transform:translateY(30px) scale(.98);filter:blur(14px) contrast(1.04) saturate(1.04)}to{opacity:1;transform:none;filter:contrast(1.04) saturate(1.04)}}
+
+/* ───────── PAGE (slides over the pinned hero) ───────── */
+.page{position:relative;z-index:2;background:var(--ink-0);border-radius:calc(var(--u)*40) calc(var(--u)*40) 0 0;border-top:1px solid var(--line);box-shadow:0 -40px 80px rgba(0,0,0,.55);margin-top:-1px}
+.section{padding:clamp(96px,calc(var(--u)*170),260px) var(--gutter) 0;max-width:calc(var(--u)*1600);margin:0 auto}
+.h2{margin:0;font-weight:200;font-size:clamp(2.4rem,calc(var(--u)*80),9rem);line-height:1;letter-spacing:-.04em;text-transform:uppercase}
+.h2 span{display:block;color:var(--muted)}
+.h2 [data-drift]{will-change:transform;transform:translate3d(var(--dx,0),0,0)}
+.lead{color:var(--muted);max-width:42ch;margin:0;font-size:calc(var(--u)*18)}
+.head-row{display:flex;justify-content:space-between;align-items:flex-end;gap:32px;flex-wrap:wrap;margin-bottom:calc(var(--u)*100)}
+
+[data-speed]{will-change:transform;transform:translate3d(0,var(--ty,0),0) rotate(var(--r,0deg))}
+
+/* breads block: faint stone surface under the cards */
+#breads{position:relative;isolation:isolate}
+#breads::before{content:"";position:absolute;inset:0 calc(50% - 50vw);z-index:-1;pointer-events:none;opacity:.2;
+  background:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27640%27 height=%27640%27%3E%3Cfilter id=%27s%27 x=%270%27 y=%270%27 width=%27100%25%27 height=%27100%25%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%27.008%27 numOctaves=%278%27 seed=%2711%27 stitchTiles=%27stitch%27/%3E%3CfeDiffuseLighting surfaceScale=%272.4%27 lighting-color=%27%23fff%27%3E%3CfeDistantLight azimuth=%27225%27 elevation=%2758%27/%3E%3C/feDiffuseLighting%3E%3CfeColorMatrix type=%27luminanceToAlpha%27 result=%27l%27/%3E%3CfeComponentTransfer in=%27l%27 result=%27hi%27%3E%3CfeFuncA type=%27linear%27 slope=%272%27 intercept=%27-1.25%27/%3E%3C/feComponentTransfer%3E%3CfeFlood flood-color=%27%23efe9df%27/%3E%3CfeComposite in2=%27hi%27 operator=%27in%27 result=%27light%27/%3E%3CfeComponentTransfer in=%27l%27 result=%27lo%27%3E%3CfeFuncA type=%27linear%27 slope=%27-2%27 intercept=%27.85%27/%3E%3C/feComponentTransfer%3E%3CfeFlood flood-color=%27%23000%27/%3E%3CfeComposite in2=%27lo%27 operator=%27in%27 result=%27dark%27/%3E%3CfeMerge%3E%3CfeMergeNode in=%27dark%27/%3E%3CfeMergeNode in=%27light%27/%3E%3C/feMerge%3E%3C/filter%3E%3Crect width=%27100%25%27 height=%27100%25%27 filter=%27url(%23s)%27/%3E%3C/svg%3E") 0 0/640px 640px;
+  -webkit-mask:linear-gradient(transparent,#000 18%,#000 82%,transparent);mask:linear-gradient(transparent,#000 18%,#000 82%,transparent)}
+.breads{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(20px,calc(var(--u)*48),90px)}
+.bread{display:flex;flex-direction:column}
+.slice{position:relative;aspect-ratio:100/110;background:var(--ink-2);overflow:hidden;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 110' preserveAspectRatio='none'%3E%3Cpath d='M9 33C3 32 0 26 0 19 0 7 15 0 50 0s50 7 50 19c0 7-3 13-9 14v69c0 5-3 8-8 8H17c-5 0-8-3-8-8z'/%3E%3C/svg%3E") center/100% 100% no-repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 110' preserveAspectRatio='none'%3E%3Cpath d='M9 33C3 32 0 26 0 19 0 7 15 0 50 0s50 7 50 19c0 7-3 13-9 14v69c0 5-3 8-8 8H17c-5 0-8-3-8-8z'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+[data-inner]{position:absolute;left:0;width:100%;top:-8%;height:116%;object-fit:cover;will-change:transform;transform:translate3d(0,var(--iy,0),0) scale(var(--is,1));transition:scale 1.6s var(--ease)}
+.bread:hover [data-inner]{scale:1.06}
+.bread__meta{display:grid;grid-template-columns:1fr auto;gap:6px 16px;padding:calc(var(--u)*30) 4px 0}
+.bread h3{margin:0;font-weight:400;font-size:calc(var(--u)*26);letter-spacing:-.02em;line-height:1.2}
+.bread p{margin:0;grid-column:1/-1;color:var(--muted);font-size:calc(var(--u)*16);max-width:34ch}
+.bread__price{font-size:calc(var(--u)*26);font-weight:200;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.bread__foot{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;margin-top:calc(var(--u)*20);padding-top:calc(var(--u)*18);border-top:1px solid var(--line);font-size:calc(var(--u)*14);color:var(--muted);font-variant-numeric:tabular-nums}
+.add{display:inline-flex;align-items:center;gap:8px;height:calc(var(--u)*40);padding:0 calc(var(--u)*17) 0 calc(var(--u)*14);border-radius:999px;border:1px solid var(--line-strong);font-size:calc(var(--u)*14);font-weight:500;color:var(--flour);transition:background .3s var(--ease),color .3s var(--ease),border-color .3s var(--ease)}
+.add svg{width:calc(var(--u)*13);height:calc(var(--u)*13);transition:transform .4s var(--ease)}
+.add:hover{background:var(--flour);color:var(--ink-1);border-color:var(--flour)}
+.add:hover svg{transform:rotate(90deg)}
+.add[aria-pressed="true"]{background:var(--crust);border-color:var(--crust);color:var(--crust-ink)}
+.order{display:flex;align-items:center;gap:calc(var(--u)*10)}
+.add{white-space:nowrap}
+.qty{display:flex;align-items:center;height:calc(var(--u)*40);border-radius:999px;background:var(--crust);color:var(--crust-ink);font-size:calc(var(--u)*14);font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+.qty:not(.on),.qty.on+.add{display:none}
+.qty button{width:calc(var(--u)*38);height:100%;display:grid;place-items:center;font-size:calc(var(--u)*18);color:var(--crust-ink);opacity:.7;transition:opacity .2s}
+.qty button:hover{opacity:1}
+.qty output{min-width:4.2ch;text-align:center}
+.motion .qty.on{animation:qtyIn .4s var(--ease)}
+@keyframes qtyIn{from{opacity:0;transform:scale(.9)}}
+
+.process{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,7fr);gap:clamp(40px,calc(var(--u)*120),200px);align-items:stretch}
+/* sticky card stack: one card per step, each next one slides in over the previous */
+.stack{--stack-h:min(74vh,calc(var(--u)*720));position:sticky;top:calc((100vh - var(--stack-h))/2 + calc(var(--u)*30));height:var(--stack-h);align-self:start}
+/* square cards in a cascade: each next one covers 60% of the previous; the group slides up to keep the newest in view */
+.stack__card{--S:min(100%,calc(var(--stack-h)*.82));position:absolute;top:0;left:calc(50% - var(--S)/2);width:var(--S);aspect-ratio:1;margin:0;border-radius:calc(var(--u)*24);overflow:hidden;background:var(--ink-2);box-shadow:0 -30px 60px -20px rgba(0,0,0,.9);transform-origin:50% 0;
+  transform:translateY(calc(var(--i,0)*var(--step,0px) + var(--shift,0px))) scale(calc(1 - var(--depth,0)*.03));filter:brightness(calc(1 - var(--depth,0)*.2))}
+.stack__card:not(.on){translate:0 60%;rotate:3deg;opacity:0}
+.motion .stack__card{transition:transform 1.8s var(--ease),translate 1.8s var(--ease),rotate 1.8s var(--ease),opacity 1.1s var(--ease),filter 1.8s var(--ease)}
+.stack__card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.stack__card:first-child img{object-position:50% 60%}
+.stack__card figcaption{position:absolute;z-index:1;left:calc(var(--u)*20);top:calc(var(--u)*20);font-size:calc(var(--u)*14);color:var(--flour-dim);padding:calc(var(--u)*8) calc(var(--u)*14);border-radius:999px;background:rgba(14,14,16,.55);backdrop-filter:blur(8px);border:1px solid var(--line)}
+.process__pin{display:contents}   /* mobile: the pinned screen holding title + gallery */
+.stack__desc{display:none}
+.steps{list-style:none;margin:calc(var(--u)*64) 0 0;padding:0;border-top:1px solid var(--line)}
+.steps li{display:grid;grid-template-columns:minmax(120px,calc(var(--u)*220)) 1fr;gap:24px;padding:calc(var(--u)*56) 0;border-bottom:1px solid var(--line)}
+/* icon as tall as the title + text next to it */
+.steps .ico{align-self:stretch;position:relative;color:var(--flour);opacity:.7}   /* takes no height of its own: the text sets the row */
+.steps .ico svg{position:absolute;left:-.12em;top:0;height:100%;width:auto;aspect-ratio:1;overflow:visible}
+/* living icons: starter bubbles rise and pop, the flake turns, the flame flickers, steam drifts over the loaf */
+.motion .ico .bub{transform-box:fill-box;transform-origin:center;animation:bubble 2.6s ease-in infinite}
+.motion .ico .bub:nth-of-type(2){animation-delay:.9s;animation-duration:2.2s}
+.motion .ico .bub:nth-of-type(3){animation-delay:1.6s;animation-duration:2.9s}
+@keyframes bubble{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:1}70%{transform:translateY(-7.2px) scale(1);opacity:1}82%{transform:translateY(-7.8px) scale(1.7);opacity:.6}90%,100%{transform:translateY(-8px) scale(2.1);opacity:0}}
+.motion .ico .flake{transform-box:view-box;transform-origin:12px 12px;animation:spin 16s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.motion .ico .fl-out{transform-box:fill-box;transform-origin:50% 100%;animation:flicker 1.6s ease-in-out infinite}
+.motion .ico .fl-in{transform-box:fill-box;transform-origin:50% 100%;animation:flicker 1.1s ease-in-out -.4s infinite reverse}
+@keyframes flicker{0%,100%{transform:scale(1,1) skewX(0)}25%{transform:scale(.96,1.07) skewX(-3deg)}50%{transform:scale(1.03,.95) skewX(2deg)}75%{transform:scale(.98,1.04) skewX(-1.5deg)}}
+.motion .ico .wisp{transform-box:fill-box;transform-origin:50% 100%;animation:wisp 2.8s ease-in-out infinite}
+.motion .ico .wisp:nth-of-type(4){animation-delay:-1.4s}
+@keyframes wisp{0%{transform:translateY(1.5px) scaleY(.7);opacity:0}30%{opacity:1}70%{transform:translateY(-1.2px) scaleY(1.05) skewX(-6deg);opacity:.8}100%{transform:translateY(-2.6px) scaleY(1.15) skewX(4deg);opacity:0}}
+.steps h3{margin:0 0 6px;font-weight:400;font-size:calc(var(--u)*21);letter-spacing:-.01em}
+.steps p{margin:0;color:var(--muted);font-size:calc(var(--u)*16);max-width:44ch}
+
+/* scroll reveal — content is visible without JS; with motion it sharpens into place */
+.motion [data-reveal]{opacity:.12;filter:blur(8px);transform:translateY(28px);transition:opacity 1.1s var(--ease),filter 1.1s var(--ease),transform 1.1s var(--ease)}
+.motion [data-reveal].in{opacity:1;filter:none;transform:none}
+
+.close{margin-top:clamp(80px,calc(var(--u)*180),280px);position:relative;text-align:center;min-height:calc(var(--u)*1040);display:flex;flex-direction:column;justify-content:center;align-items:center;padding-bottom:clamp(80px,calc(var(--u)*140),220px)}
+/* warm haze + steam behind the closing headline, same recipe as the hero */
+.close::before{content:"";position:absolute;left:50%;top:48%;width:min(100%,calc(var(--u)*1300));height:calc(var(--u)*900);transform:translate(-50%,-50%);z-index:0;pointer-events:none;background:radial-gradient(50% 50% at 50% 50%,var(--glow),transparent 72%)}
+.close__steam{position:absolute;left:0;width:100%;top:-6%;height:96%;z-index:0;pointer-events:none;opacity:.4;
+  -webkit-mask:radial-gradient(48% 50% at 50% 55%,#000 45%,transparent 100%);mask:radial-gradient(48% 50% at 50% 55%,#000 45%,transparent 100%)}
+.close .h2{font-size:clamp(2.6rem,calc(var(--u)*104),11rem);position:relative;z-index:2}
+.close .lead{margin:calc(var(--u)*30) 0 calc(var(--u)*44);width:100%;position:relative;z-index:2;text-wrap:balance}
+.close__actions{display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;position:relative;z-index:2}
+.btn--lg{height:calc(var(--u)*58);padding:0 calc(var(--u)*30);border-radius:calc(var(--u)*14);font-size:calc(var(--u)*16)}
+.pill{display:inline-flex;align-items:center;gap:10px;height:calc(var(--u)*58);padding:0 calc(var(--u)*24) 0 calc(var(--u)*9);border-radius:999px;background:var(--ink-2);border:1px solid var(--line);font-size:calc(var(--u)*16);font-weight:400;transition:border-color .3s var(--ease)}
+.pill:hover{border-color:var(--line-strong)}
+.pill i{width:calc(var(--u)*40);height:calc(var(--u)*40);border-radius:50%;background:var(--ink-0);display:grid;place-items:center}
+.pill svg{width:calc(var(--u)*17);height:calc(var(--u)*17)}
+
+/* floating cards around the closing headline */
+.float{position:absolute;z-index:1;border-radius:calc(var(--u)*18);overflow:hidden;box-shadow:0 30px 60px -24px rgba(0,0,0,.7)}
+.float img{width:100%;height:100%;object-fit:cover}
+.f1{width:calc(var(--u)*230);height:calc(var(--u)*170);left:3%;top:12%;--r:-7deg}
+/* cut-out sandwiches: no frame, just a soft shadow under them */
+.cut{position:absolute;z-index:1;pointer-events:none}
+.cut img{display:block;width:100%;height:auto;filter:drop-shadow(0 28px 30px rgba(0,0,0,.6))}
+.c1{width:calc(var(--u)*230);right:2.5%;top:6%;--r:9deg}
+.c2{width:calc(var(--u)*230);left:6%;top:42%;--r:-7deg}
+.f4{width:calc(var(--u)*190);height:calc(var(--u)*190);border-radius:50%;right:8%;bottom:21%;--r:0deg}
+/* reviews pop up around the closing headline */
+.review{position:absolute;z-index:1;margin:0;width:calc(var(--u)*268)}
+.review__card{padding:calc(var(--u)*16) calc(var(--u)*18) calc(var(--u)*18);border-radius:calc(var(--u)*18);background:rgba(28,28,30,.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--line-strong);box-shadow:0 30px 60px -24px rgba(0,0,0,.75);text-align:left}
+.review figcaption{display:flex;align-items:center;gap:calc(var(--u)*10);font-size:calc(var(--u)*14);color:var(--flour)}
+.review figcaption b{font-weight:400}
+.review__ava{width:calc(var(--u)*30);height:calc(var(--u)*30);border-radius:50%;display:grid;place-items:center;background:var(--crust);color:var(--crust-ink);font-size:calc(var(--u)*12);font-weight:500;flex:none}
+.review__ava{overflow:hidden}
+.review__ava img{width:100%;height:100%;object-fit:cover}
+.review__stars{margin-left:auto;color:#d98a4a;font-size:calc(var(--u)*11);letter-spacing:.12em}
+.review blockquote{margin:calc(var(--u)*12) 0 0;font-size:calc(var(--u)*15);line-height:1.45;color:var(--flour-dim);text-wrap:pretty}
+/* free bands above the headline and below the buttons; negative speeds push them outward while scrolling */
+.r1{left:24%;top:14%;--r:-3deg}
+.r2{right:24%;top:17%;--r:2.5deg}
+.r3{left:10%;bottom:12%;--r:2deg}
+.r4{right:27%;bottom:16%;--r:-2deg}
+.motion .review__card{opacity:0;transform:translateY(36px) scale(.9);filter:blur(6px)}
+.motion .review.in .review__card{animation:reviewIn .9s var(--ease) var(--delay) both,bob 7s ease-in-out calc(var(--delay) + .9s) infinite}
+@keyframes reviewIn{to{opacity:1;transform:none;filter:none}}
+@keyframes bob{0%,100%{opacity:1;filter:none;transform:translateY(0)}50%{opacity:1;filter:none;transform:translateY(-8px)}}
+.chip{overflow:visible;display:flex;align-items:center;gap:calc(var(--u)*10);padding:calc(var(--u)*12) calc(var(--u)*18);border-radius:999px;background:var(--crust);color:var(--crust-ink);font-size:calc(var(--u)*15);font-weight:400;white-space:nowrap}
+.chip b{font-weight:200;font-size:calc(var(--u)*30);letter-spacing:-.03em;line-height:1}
+.chip--dark{background:var(--ink-2);color:var(--flour-dim);border:1px solid var(--line-strong)}
+.chip svg{width:calc(var(--u)*18);height:calc(var(--u)*18)}
+
+.foot{position:relative;z-index:2;background:var(--ink-0);border-top:1px solid var(--line);margin:0;padding:calc(var(--u)*30) var(--gutter) calc(var(--u)*110);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:20px;font-size:calc(var(--u)*14);color:var(--muted)}
+.foot nav{display:flex;gap:28px;justify-self:center}
+.foot>:first-child{justify-self:start}
+.foot>:last-child{justify-self:end;text-align:right}
+.foot a:hover{color:var(--flour)}
+
+/* scroll progress dock */
+.dock{position:fixed;left:50%;bottom:calc(var(--u)*22);transform:translateX(-50%);z-index:40;display:flex;align-items:center;gap:calc(var(--u)*14);height:calc(var(--u)*56);padding:0 calc(var(--u)*7) 0 calc(var(--u)*20);border-radius:999px;background:rgba(19,19,21,.72);backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);border:1px solid var(--line-strong);box-shadow:0 18px 40px -16px rgba(0,0,0,.7);font-size:calc(var(--u)*14);opacity:0;translate:0 160%;transition:opacity .6s var(--ease),translate .8s var(--ease)}
+.dock.on{opacity:1;translate:0 0}
+.dock .logo img{height:calc(var(--u)*30)}
+.dock__pct{min-width:4ch;text-align:right;font-variant-numeric:tabular-nums;color:var(--flour-dim);margin-left:calc(var(--u)*30)}
+.dock__bar{width:calc(var(--u)*70);height:2px;border-radius:2px;background:var(--line);overflow:hidden}
+.dock__bar i{display:block;height:100%;background:var(--flour);transform-origin:left;transform:scaleX(var(--k,0))}
+.dock .btn{height:calc(var(--u)*42);border-radius:999px;padding:0 calc(var(--u)*18)}
+
+/* ───────── RESPONSIVE ───────── */
+@media (max-width:1100px){
+  .headline h1{font-size:calc(var(--u)*80)}
+  .stage{--sh:clamp(calc(var(--u)*680),calc(100svh - 24px - calc(var(--u)*28)),calc(var(--u)*740))}
+  .facts{grid-template-columns:calc(var(--u)*150) calc(var(--u)*150)}
+  .about p{font-size:calc(var(--u)*13.5)}
+  .faces span:nth-child(3){display:none}
+  .side{justify-content:flex-end}
+  .ring{display:none}
+  .tag{font-size:12px}
+  .r4{display:none}
+  .r1{left:27%}
+}
+@media (max-width:960px){
+  /* stove sits behind the bread stack: fire peeks out on the right */
+  .hero::before{top:300px;bottom:auto;left:0;width:100%;height:680px;background-position:52% 50%;opacity:.55;
+    -webkit-mask:linear-gradient(90deg,transparent,#000 35%),linear-gradient(180deg,transparent,#000 25%,#000 70%,transparent);-webkit-mask-composite:source-in;
+    mask:linear-gradient(90deg,transparent,#000 35%),linear-gradient(180deg,transparent,#000 25%,#000 70%,transparent);mask-composite:intersect}
+  .hero-wrap{position:relative;z-index:50}
+  .hero{height:auto}
+  .burger{display:grid}
+  .burger,.nav .logo,.nav .btn{position:relative;z-index:2}
+  .burger span{transition:width .4s var(--ease),transform .45s var(--ease)}
+  .nav.open .burger span{width:calc(var(--u)*26)}
+  .nav.open .burger span:first-child{transform:translateY(calc(var(--u)*4 + .75px)) rotate(45deg)}
+  .nav.open .burger span:last-child{transform:translateY(calc(var(--u)*-4 - .75px)) rotate(-45deg)}
+  .nav__links{position:fixed;inset:0;z-index:1;flex-direction:column;align-items:flex-start;justify-content:center;gap:clamp(12px,3vh,26px);margin:0;padding:0 var(--gutter);background:rgba(15,15,17,.94);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);opacity:0;visibility:hidden;transition:opacity .4s var(--ease),visibility 0s .4s}
+  .nav.open .nav__links{opacity:1;visibility:visible;transition:opacity .4s var(--ease)}
+  .nav .nav__links a.link{font-size:clamp(32px,9vw,48px);font-weight:300;line-height:1.15;letter-spacing:-.01em;color:var(--flour);opacity:0;transform:translateY(18px);transition:opacity .5s var(--ease),transform .6s var(--ease)}
+  .nav.open .nav__links a.link{opacity:1;transform:none}
+  .nav.open .nav__links a.link:nth-child(2){transition-delay:.05s}
+  .nav.open .nav__links a.link:nth-child(3){transition-delay:.1s}
+  .nav.open .nav__links a.link:nth-child(4){transition-delay:.15s}
+  .lock{overflow:hidden}
+  .nav{position:fixed;top:0;left:0;right:0;padding:14px var(--gutter)}
+  .nav::before{content:"";position:absolute;inset:0;background:rgba(15,15,17,.72);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);opacity:0;transition:opacity .4s var(--ease)}
+  .nav.stuck::before{opacity:1}
+  .nav .logo{position:absolute;left:50%;top:50%;translate:-50% -50%}   /* centred between burger and button */
+  .nav .logo img{height:40px}
+  .nav__links{align-items:center;text-align:center}
+  .main{grid-template-columns:1fr;grid-template-rows:none;grid-template-areas:"head" "stage" "side" "facts";justify-items:center;padding-top:84px}
+  .headline{justify-self:start;padding-bottom:0}
+  .headline h1{font-size:clamp(2.6rem,12vw,7rem)}
+  .headline p{font-size:16px}
+  .stage{height:min(72vh,560px);margin:70px 0 40px}
+  .callouts{display:none}
+  .side{position:static;justify-self:stretch;padding:0;margin-bottom:28px}
+  .ring{display:none}
+  .night{width:min(100%,560px);margin:0 auto;display:grid;grid-template-columns:1fr 140px;grid-template-rows:auto 1fr}
+  .night h2{grid-column:1;padding-bottom:0;font-size:19px}
+  .night figure{grid-column:2;grid-row:1/3;margin:12px 12px 12px 0;height:auto}
+  .night footer{grid-column:1;border:0;margin:0;padding-top:8px;font-size:13px}
+  .night footer b{font-size:16px}
+  .facts{justify-self:stretch;width:min(100%,560px);margin:0 auto 28px;grid-template-columns:1fr 1fr;gap:12px;transform:none;opacity:1}
+  .slow,.about{height:190px;border-radius:20px;padding:18px 20px}
+  .slow__top,.about a{font-size:13px}
+  .slow__thumb{width:56px;height:56px}
+  .slow__num{font-size:46px}.slow__num small{font-size:15px}.slow__cap{font-size:13px}
+  .about p{font-size:16px}
+  .faces span{width:30px;height:30px;font-size:12px}
+  .score b{font-size:30px}.score svg{width:12px;height:12px}
+  .page{border-radius:28px 28px 0 0}
+  /* pinned horizontal gallery: vertical scroll slides the cards (photo + its step) sideways, then releases */
+  .process{display:block;height:calc(100vh + 210vh);height:calc(100svh + 210svh)}
+  .process__pin{position:sticky;top:0;height:100vh;height:100svh;display:flex;flex-direction:column;margin:0 calc(var(--gutter)*-1);padding:84px 0 88px;overflow:hidden}   /* bottom room for the dock */
+  .process__pin>div:last-child{order:-1;padding:0 var(--gutter)}
+  .process__pin .h2{margin:0 0 24px}
+  .has-desc .steps{display:none}
+  .stack{position:relative;top:auto;height:auto;flex:1;min-height:0;align-self:stretch}
+  .stack__rail{height:100%;display:flex;gap:14px;padding:0 var(--gutter)}
+  .stack__card,.stack__card:not(.on){position:relative;top:auto;left:auto;flex:0 0 min(84%,520px);width:auto;height:100%;aspect-ratio:auto;display:flex;flex-direction:column;overflow:visible;border-radius:0;background:none;box-shadow:none;transform:translate3d(var(--gx,0px),0,0);translate:none;rotate:none;opacity:1;filter:none;transition:none}
+  .motion .stack__card{transition:none}
+  .stack__card img{position:relative;inset:auto;flex:1;min-height:0;border-radius:20px}
+  .stack__card figcaption{left:14px;top:14px;font-size:13px}
+  .stack__desc{display:block;padding-top:20px}
+  .stack__desc .ico{display:block;width:40px;height:40px;margin-bottom:12px;color:var(--flour);opacity:.7}
+  .stack__desc .ico svg{display:block;width:100%;height:100%;overflow:visible}
+  .stack__desc h3{margin:0 0 6px;font-weight:400;font-size:18px;letter-spacing:-.01em}
+  .stack__desc p{margin:0;color:var(--muted);font-size:15px;max-width:44ch}
+  .breads{grid-template-columns:1fr 1fr}
+  .bread:last-child{grid-column:1/-1;max-width:calc(50% - 12px)}
+  /* closing block: photos and reviews float above and below the text */
+  .close{margin-top:90px;min-height:auto;padding-top:300px;padding-bottom:340px;overflow-x:clip}
+  .float{border-radius:16px}
+  .f1{width:140px;height:104px;left:-12px;top:44px}
+  .c1{width:min(132px,34vw);left:18px;right:auto;top:168px}
+  .c2{width:min(150px,37vw);left:-10px;top:auto;bottom:40px}
+  .f4{width:112px;height:112px;right:14px;left:auto;top:auto;bottom:214px}
+  .review{width:min(206px,56vw)}
+  .review__card{padding:12px 14px 14px;border-radius:16px}
+  .review figcaption{gap:8px;font-size:13px}
+  .review__ava{width:26px;height:26px;font-size:11px}
+  .review__stars{font-size:10px}
+  .review blockquote{margin-top:8px;font-size:13px}
+  .r1{left:auto;right:6px;top:84px}
+  .r2{right:10px;left:auto;top:auto;bottom:36px}
+  .r3{left:6px;right:auto;bottom:176px}
+  .r4{display:none}
+}
+@media (max-width:640px){
+  :root{--gutter:20px}
+  .hero-wrap{padding:8px}
+  .page{box-shadow:none;margin-top:8px;border-radius:24px 24px 0 0}
+  .h2,.close .h2{font-size:11vw}
+  .head-row{margin-bottom:48px}
+  .hero{border-radius:20px}
+  .nav{padding:12px var(--gutter)}
+  .nav .btn{height:38px;padding:0 14px;font-size:14px}
+  .nav .btn svg{display:none}
+  .nav .logo img{height:36px}
+  .headline h1{font-size:clamp(2.6rem,17.5vw,5.5rem)}
+  .headline p{margin-top:20px;font-size:15px}
+  .stage{height:auto;width:min(76vw,340px);margin:60px 0 36px}
+  .callouts{display:none}
+  .side{position:static;justify-self:stretch;margin-bottom:28px}
+  .night{width:100%;display:grid;grid-template-columns:1fr 112px;grid-template-rows:auto 1fr}
+  .night h2{grid-column:1;padding-bottom:0;font-size:18px}
+  .night figure{grid-column:2;grid-row:1/3;margin:12px 12px 12px 0;height:auto}
+  .night footer{grid-column:1;border:0;margin:0;padding-top:8px;font-size:12px}
+  .night footer b{font-size:15px}
+  .slow,.about{height:auto;min-height:176px;padding:16px}
+  .slow__num{font-size:40px}
+  .about p{font-size:15px}
+  .breads{grid-template-columns:1fr}
+  .bread:last-child{max-width:none}
+  .bread h3,.bread__price{font-size:22px}
+  .bread p,.steps p,.lead{font-size:15px}
+  .bread__foot,.add{font-size:13px}
+  .add{height:36px}
+  .qty{height:36px;font-size:13px}
+  .qty button{width:30px;font-size:16px}
+  .order{gap:6px}
+  .steps li{grid-template-columns:1fr;gap:10px}
+  .steps .ico{height:56px}
+  .steps h3{font-size:18px}
+  .btn--lg,.pill{height:52px;font-size:15px}
+  .foot{display:flex;flex-direction:column;align-items:flex-start;font-size:13px}
+  /* mobile dock: just the percentage and the progress line */
+  .dock{gap:12px;height:40px;bottom:12px;padding:0 18px}
+  .dock .logo,.dock .btn{display:none}
+  .dock__pct{margin-left:0;min-width:3.5ch;font-size:13px}
+  .dock__bar{width:110px}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M7 17 17 7M8 7h9v9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-steam" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M7 14c-1.6-1.8 1.6-3.2 0-5s1.4-3.2 0-5"/><path d="M12 14c-1.6-1.8 1.6-3.2 0-5s1.4-3.2 0-5"/><path d="M17 14c-1.6-1.8 1.6-3.2 0-5s1.4-3.2 0-5"/><path d="M3.5 17.5c2.5 2 14.5 2 17 0"/></g></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></g></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></g></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" d="m12 2.8 2.7 6 6.5.6-4.9 4.3 1.5 6.4L12 16.7l-5.8 3.4 1.5-6.4-4.9-4.3 6.5-.6z"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4.5 18.5 5.6 15A7.5 7.5 0 1 1 9 18.4z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+</svg>
+
+<div class="hero-wrap">
+<header class="hero">
+  <nav class="nav" aria-label="Основная навигация">
+    <button class="burger" aria-label="Открыть меню" aria-expanded="false" aria-controls="menu"><span></span><span></span></button>
+    <a class="logo" href="#" aria-label="Опара — на главную"><img src="assets/logo.png" alt="Опара" width="624" height="402"></a>
+    <div class="nav__links" id="menu">
+      <a class="link" href="#breads">Хлеба</a>
+      <a class="link" href="#process">Как печём</a>
+      <a class="link" href="#order">Доставка</a>
+      <a class="link" href="#order">Отзывы</a>
+      <a class="link" href="../index.html">← Все макеты</a>
+    </div>
+    <a class="btn" href="#order">Заказать <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+  </nav>
+
+  <div class="main">
+    <div class="headline">
+      <h1><span><i>Хлеб,</i></span><span><i>который</i></span><span><i>дышит</i></span></h1>
+      <p>Домашний хлеб на&nbsp;живой закваске. Печём ночью — к&nbsp;завтраку он&nbsp;ещё тёплый</p>
+    </div>
+
+    <div class="facts">
+      <div class="slow">
+        <div class="slow__top">
+          <span>Живая<br>закваска</span>
+          <span class="slow__thumb"><img src="assets/starter-bubbles.jpg" alt=""></span>
+        </div>
+        <div>
+          <div class="slow__num">48<small>часов</small></div>
+          <div class="slow__cap">медленного брожения</div>
+        </div>
+      </div>
+      <div class="about">
+        <a href="#process"><svg aria-hidden="true"><use href="#i-plus"/></svg>О нас</a>
+        <p>Мука, вода, соль и&nbsp;закваска — больше ничего</p>
+        <div class="rating" role="img" aria-label="Оценка покупателей 4,9 из 5">
+          <div class="faces" aria-hidden="true"><span>А</span><span>М</span><span><img src="assets/face-dog.jpg" alt="" width="160" height="160"></span></div>
+          <div class="score" aria-hidden="true"><b>4,9</b><svg><use href="#i-star"/></svg></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage__rim" aria-hidden="true"></div>
+      <div class="stage__shadow" aria-hidden="true"></div>
+      <div class="stage__bread">
+        <img class="stage__img" src="assets/bread-stack-2.webp" width="750" height="1125" alt="Три буханки хлеба на закваске стопкой, верхняя разрезана — виден пористый мякиш">
+      </div>
+      <canvas class="steam" aria-hidden="true"></canvas>
+      <div class="callouts">
+        <div class="co co1">
+          <span class="leader" aria-hidden="true"><i></i></span><span class="dot" aria-hidden="true"></span>
+          <button class="tag" type="button" aria-expanded="false" aria-controls="cp1">Пористый мякиш<svg aria-hidden="true"><use href="#i-plus"/></svg></button>
+          <div class="panel" id="cp1">
+            <figure><img src="assets/crumb.jpg" alt="Срез мякиша с крупными неровными порами"></figure>
+            <div class="panel__txt"><p>Крупные поры — 48&nbsp;часов брожения</p></div>
+          </div>
+        </div>
+        <div class="co co2">
+          <span class="leader" aria-hidden="true"><i></i></span><span class="dot" aria-hidden="true"></span>
+          <button class="tag" type="button" aria-expanded="false" aria-controls="cp2">Мука грубого помола<svg aria-hidden="true"><use href="#i-plus"/></svg></button>
+          <div class="panel" id="cp2">
+            <figure><img src="assets/flour-crust.jpg" alt="Румяная корка с надрезами, обсыпанная мукой"></figure>
+            <div class="panel__txt"><p>Каменный помол, обсыпаем вручную</p></div>
+          </div>
+        </div>
+        <div class="co co3">
+          <span class="leader" aria-hidden="true"><i></i></span><span class="dot" aria-hidden="true"></span>
+          <button class="tag tag--l" type="button" aria-expanded="false" aria-controls="cp3">Хрустящая корка<svg aria-hidden="true"><use href="#i-plus"/></svg></button>
+          <div class="panel panel--up" id="cp3">
+            <figure><img src="assets/loaf-steam-hd.jpg" alt="Румяная корка горячей буханки с надрезами"></figure>
+            <div class="panel__txt"><p>Камень, пар и&nbsp;250&nbsp;°C — корка трещит</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="side">
+      <a class="ring" href="#breads" aria-label="Смотреть хлеба"><svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <article class="night">
+        <h2>Печём ночью, привозим тёплым</h2>
+        <figure><img src="assets/seed-loaf.jpg" alt="Тёплая зерновая буханка в льняной ткани, над ней пар" style="object-position:50% 45%"></figure>
+        <footer><p><svg aria-hidden="true"><use href="#i-clock"/></svg><span>Доставка к&nbsp;завтраку<b>до 9:00</b></span></p><p><svg aria-hidden="true"><use href="#i-pin"/></svg><span>г.&nbsp;Москва</span></p></footer>
+      </article>
+    </aside>
+  </div>
+
+</header>
+</div>
+
+<div class="page">
+<main>
+  <section class="section" id="breads" aria-labelledby="breads-h">
+    <div class="head-row">
+      <h2 class="h2" id="breads-h"><span data-drift="-1" style="color:inherit">Три хлеба</span><span data-drift="1">Одна закваска</span></h2>
+      <p class="lead" data-reveal>Каждый печём небольшой партией и&nbsp;только под заказ — ничего не&nbsp;лежит на&nbsp;полке</p>
+    </div>
+    <div class="breads">
+      <article class="bread" data-speed="0">
+        <div class="slice"><img data-inner src="assets/wheat-crumb.webp" alt="Пористый мякиш пшеничного хлеба" loading="lazy"></div>
+        <div class="bread__meta">
+          <h3>Пшеничный</h3><span class="bread__price">390 ₽</span>
+          <p>Открытый мякиш, тонкая хрустящая корка, лёгкая кислинка</p>
+          <div class="bread__foot"><span>750 г · 48 ч брожения</span><button class="add" aria-pressed="false"><svg aria-hidden="true"><use href="#i-plus"/></svg><span>В заказ</span></button></div>
+        </div>
+      </article>
+      <article class="bread" data-speed="0.14" data-settle>
+        <div class="slice"><img data-inner src="assets/rye-crust.jpg" alt="Потрескавшаяся корка ржаного хлеба в муке" loading="lazy"></div>
+        <div class="bread__meta">
+          <h3>Ржаной</h3><span class="bread__price">420 ₽</span>
+          <p>Плотный, влажный, с&nbsp;глубоким вкусом ржаной закваски</p>
+          <div class="bread__foot"><span>900 г · 36 ч брожения</span><button class="add" aria-pressed="false"><svg aria-hidden="true"><use href="#i-plus"/></svg><span>В заказ</span></button></div>
+        </div>
+      </article>
+      <article class="bread" data-speed="0.06" data-settle>
+        <div class="slice"><img data-inner src="assets/seeds.jpg" alt="Корка зернового хлеба с семенами подсолнечника, льна и кунжута" loading="lazy"></div>
+        <div class="bread__meta">
+          <h3>Зерновой</h3><span class="bread__price">450 ₽</span>
+          <p>Подсолнечник, лён и&nbsp;кунжут в&nbsp;тесте и&nbsp;на&nbsp;корке</p>
+          <div class="bread__foot"><span>800 г · 40 ч брожения</span><button class="add" aria-pressed="false"><svg aria-hidden="true"><use href="#i-plus"/></svg><span>В заказ</span></button></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="section" id="process" aria-labelledby="process-h">
+    <div class="process">
+      <div class="process__pin">
+      <div class="stack">
+        <div class="stack__rail">
+        <figure class="stack__card on" style="--i:0"><img src="assets/dough.webp" alt="Тянущееся тесто на деревянной ложке в муке" loading="lazy" style="object-position:50% 52%"><figcaption>Вечер — закваска просыпается</figcaption></figure>
+        <figure class="stack__card" style="--i:1"><img src="assets/dough-cold-2.jpg" alt="Пузырчатое тесто на подносе с морозными узорами" loading="lazy" style="object-position:50% 48%"><figcaption>36 часов в&nbsp;холоде — тесто зреет</figcaption></figure>
+        <figure class="stack__card" style="--i:2"><img src="assets/oven.jpg" alt="Буханки на доске у жаркой дровяной печи, рядом поднимается пар" loading="lazy"><figcaption>250&nbsp;°C, камень и&nbsp;пар</figcaption></figure>
+        <figure class="stack__card" style="--i:3"><img src="assets/breakfast.webp" alt="Завтрак: ломти хлеба на закваске, сливочное масло, яйца и чай" loading="lazy" style="object-position:50% 30%"><figcaption>К&nbsp;9:00 — у&nbsp;вас на&nbsp;столе</figcaption></figure>
+        </div>
+      </div>
+      <div>
+        <h2 class="h2" id="process-h"><span data-drift="1" style="color:inherit">Медленно</span><span data-drift="-1">и&nbsp;честно</span></h2>
+        <ol class="steps">
+          <li data-reveal><span class="ico ico--jar" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path vector-effect="non-scaling-stroke" d="M8.5 2.8h7M9.3 2.8v2.4c0 .6-.4 1.1-.9 1.4C6.5 7.6 5.3 9.4 5.3 11.8v6.6a2.6 2.6 0 0 0 2.6 2.6h8.2a2.6 2.6 0 0 0 2.6-2.6v-6.6c0-2.4-1.2-4.2-3.1-5.2-.5-.3-.9-.8-.9-1.4V2.8"/><circle class="bub" vector-effect="non-scaling-stroke" cx="10" cy="17.6" r="1.35"/><circle class="bub" vector-effect="non-scaling-stroke" cx="14.4" cy="16.6" r="1"/><circle class="bub" vector-effect="non-scaling-stroke" cx="12.6" cy="18.8" r="1.1"/></svg></span><div><h3>Закваска просыпается</h3><p>Кормим закваску вечером, к&nbsp;ночи она готова поднять тесто без грамма дрожжей</p></div></li>
+          <li data-reveal><span class="ico ico--cold" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><g class="flake"><path vector-effect="non-scaling-stroke" d="M12 2.5v19M3.8 7.25l16.4 9.5M3.8 16.75l16.4-9.5"/><path vector-effect="non-scaling-stroke" d="m9.6 4 2.4 2.2L14.4 4M9.6 20l2.4-2.2 2.4 2.2M4.3 10.4l3.1-1-.7-3.2M19.7 13.6l-3.1 1 .7 3.2M6.7 17.8l.7-3.2-3.1-1M17.3 6.2l-.7 3.2 3.1 1"/></g></svg></span><div><h3>Тесто зреет в&nbsp;холоде</h3><p>Долгое холодное брожение даёт крупные поры, аромат и&nbsp;хлеб, который не&nbsp;черствеет за&nbsp;день</p></div></li>
+          <li data-reveal><span class="ico ico--flame" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path class="fl-out" vector-effect="non-scaling-stroke" d="M12 21.2c-3.7 0-6.2-2.5-6.2-5.8 0-3.5 2.7-5.4 3.7-8.7.9 1.4 1.5 2.7 1.5 4.1 1.2-.8 2-2.6 2-4.8 2.9 2.1 5 5.4 5 9.4 0 3.3-2.4 5.8-6 5.8z"/><path class="fl-in" vector-effect="non-scaling-stroke" d="M12 21.2c-1.5 0-2.6-1-2.6-2.5 0-1.7 1.5-2.5 2.6-4.2 1.1 1.7 2.6 2.5 2.6 4.2 0 1.5-1.1 2.5-2.6 2.5z"/></svg></span><div><h3>Печь на&nbsp;камне</h3><p>Сорок пять минут с&nbsp;паром — отсюда тонкая корка, которая трещит, когда остывает</p></div></li>
+          <li data-reveal><span class="ico ico--loaf" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path vector-effect="non-scaling-stroke" d="M4 16c0-4.6 3.6-7.4 8-7.4s8 2.8 8 7.4c0 1.3-1 2.3-2.3 2.3H6.3C5 18.3 4 17.3 4 16z"/><path vector-effect="non-scaling-stroke" d="m8.4 12 1.5 2.4M11.7 11l1.5 2.4M15 12l1.5 2.4M2.8 21h18.4"/><path class="wisp" vector-effect="non-scaling-stroke" d="M10 6.4c-.8-1 .8-1.6 0-2.6s.8-1.6 0-2.4"/><path class="wisp" vector-effect="non-scaling-stroke" d="M14 6.4c-.8-1 .8-1.6 0-2.6s.8-1.6 0-2.4"/></svg></span><div><h3>Хлеб у&nbsp;вас на&nbsp;столе</h3><p>Привозим утром, пока буханка ещё тёплая. Заказ на&nbsp;завтра — до&nbsp;18:00</p></div></li>
+        </ol>
+      </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section close" id="order" aria-labelledby="order-h">
+    <canvas class="close__steam" aria-hidden="true"></canvas>
+    <div class="float f1" data-speed="-0.14" aria-hidden="true"><img src="assets/crumb.jpg" alt="" loading="lazy"></div>
+    <div class="cut c1" data-speed="0.12" aria-hidden="true"><img src="assets/toast-jam.webp" alt="" width="720" height="544" loading="lazy"></div>
+    <div class="cut c2" data-speed="-0.08" aria-hidden="true"><img src="assets/sandwich.webp" alt="" width="720" height="437" loading="lazy"></div>
+    <div class="float f4" data-speed="0.16" aria-hidden="true"><img src="assets/seeds.jpg" alt="" loading="lazy"></div>
+    <figure class="review r1" data-speed="-0.04" style="--delay:.1s"><div class="review__card"><figcaption><span class="review__ava"><img src="assets/ava-anna.jpg" alt="" width="160" height="160" loading="lazy"></span><b>Анна</b><span class="review__stars" aria-label="5 из 5">★★★★★</span></figcaption><blockquote>Корка правда трещит. Дети съели полбуханки ещё до&nbsp;школы</blockquote></div></figure>
+    <figure class="review r2" data-speed="-0.03" style="--delay:.35s"><div class="review__card"><figcaption><span class="review__ava">М</span><b>Михаил</b><span class="review__stars" aria-label="5 из 5">★★★★★</span></figcaption><blockquote>Ржаной как у&nbsp;бабушки в&nbsp;деревне. Беру каждую неделю</blockquote></div></figure>
+    <figure class="review r3" data-speed="-0.05" style="--delay:.6s"><div class="review__card"><figcaption><span class="review__ava"><img src="assets/ava-irina.jpg" alt="" width="160" height="160" loading="lazy"></span><b>Ирина</b><span class="review__stars" aria-label="5 из 5">★★★★★</span></figcaption><blockquote>Привезли в&nbsp;8:40 — хлеб был ещё тёплый</blockquote></div></figure>
+    <figure class="review r4" data-speed="-0.03" style="--delay:.85s"><div class="review__card"><figcaption><span class="review__ava"><img src="assets/ava-dmitry.jpg" alt="" width="160" height="160" loading="lazy"></span><b>Дмитрий</b><span class="review__stars" aria-label="5 из 5">★★★★★</span></figcaption><blockquote>Зерновой с&nbsp;семечками — лучший тост в&nbsp;моей жизни</blockquote></div></figure>
+
+    <h2 class="h2" id="order-h"><span data-drift="-1" style="color:inherit">Тёплый хлеб</span><span data-drift="1">к&nbsp;завтраку</span></h2>
+    <p class="lead" data-reveal>Закажите до&nbsp;18:00 — испечём ночью и&nbsp;привезём утром</p>
+    <div class="close__actions" data-reveal>
+      <a class="btn btn--lg" href="#breads">Заказать на завтра <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <a class="pill" href="#order"><i><svg aria-hidden="true"><use href="#i-chat"/></svg></i>Оставить отзыв</a>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <a class="logo" href="#" aria-label="Опара — наверх"><img src="assets/logo.png" alt="Опара" width="624" height="402"></a>
+  <nav aria-label="Нижнее меню"><a href="#breads">Хлеба</a><a href="#process">Как печём</a><a href="#order">Заказ</a><a href="#order">Отзывы</a><a href="../index.html">Все макеты</a></nav>
+  <span>© 2026 Опара — домашняя пекарня</span>
+</footer>
+</div>
+
+<div class="dock" aria-label="Прогресс прокрутки">
+  <a class="logo" href="#" aria-label="Наверх"><img src="assets/logo.png" alt="Опара" width="624" height="402"></a>
+  <span class="dock__pct" aria-hidden="true">0%</span>
+  <span class="dock__bar" aria-hidden="true"><i></i></span>
+  <a class="btn" href="#order">Заказать</a>
+</div>
+
+<script>
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const root=document.documentElement;
+if(!reduce) root.classList.add('motion');
+
+/* callout panels: tap / Enter toggles (hover and focus open them through CSS) */
+const closeCallouts=()=>document.querySelectorAll('.co.open').forEach(c=>{c.classList.remove('open');c.querySelector('.tag').setAttribute('aria-expanded','false')});
+document.querySelectorAll('.co .tag').forEach(b=>b.addEventListener('click',e=>{
+  e.stopPropagation(); const co=b.closest('.co'), on=!co.classList.contains('open');
+  closeCallouts(); if(on){fitPanel(co);co.classList.add('open');b.setAttribute('aria-expanded','true')}
+}));
+document.addEventListener('click',e=>{if(!e.target.closest('.co')) closeCallouts()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeCallouts();document.activeElement?.closest('.co')&&document.activeElement.blur()}});
+
+/* nudge an opening panel back inside the hero if it would cross an edge */
+const heroBox=document.querySelector('.hero');
+function fitPanel(co){
+  const p=co.querySelector('.panel'); if(!p) return; p.style.translate='';
+  const r=p.getBoundingClientRect(), h=heroBox.getBoundingClientRect(), m=16; let dx=0, dy=0;
+  if(r.left<h.left+m) dx=h.left+m-r.left; else if(r.right>h.right-m) dx=h.right-m-r.right;
+  if(r.top<h.top+m) dy=h.top+m-r.top; else if(r.bottom>h.bottom-m) dy=h.bottom-m-r.bottom;
+  if(dx||dy) p.style.translate=dx+'px '+dy+'px';
+}
+document.querySelectorAll('.co').forEach(co=>{co.addEventListener('pointerenter',()=>fitPanel(co));co.addEventListener('focusin',()=>fitPanel(co))});
+
+/* mobile menu */
+{
+  const nav=document.querySelector('.nav'), burger=nav.querySelector('.burger');
+  const menu=open=>{
+    nav.classList.toggle('open',open); root.classList.toggle('lock',open);
+    burger.setAttribute('aria-expanded',open); burger.setAttribute('aria-label',open?'Закрыть меню':'Открыть меню');
+  };
+  burger.addEventListener('click',()=>menu(!nav.classList.contains('open')));
+  nav.querySelectorAll('.nav__links a').forEach(a=>a.addEventListener('click',()=>menu(false)));
+  addEventListener('keydown',e=>{if(e.key==='Escape'&&nav.classList.contains('open')){menu(false);burger.focus()}});
+  matchMedia('(min-width:961px)').addEventListener('change',e=>{if(e.matches)menu(false)});
+  const stuck=()=>nav.classList.toggle('stuck',scrollY>8);
+  addEventListener('scroll',stuck,{passive:true}); stuck();
+}
+
+/* order toggles */
+const counts=[...document.querySelectorAll('a.btn')].filter(a=>a.textContent.trim().startsWith('Заказать')).map(a=>{
+  const c=document.createElement('span'); c.className='count'; c.setAttribute('aria-hidden','true'); a.append(c); return c;
+});
+const items=[...document.querySelectorAll('.add')].map(b=>{
+  const q=document.createElement('span'); q.className='qty';
+  q.innerHTML='<button type="button" aria-label="Меньше">−</button><output>1 шт</output><button type="button" aria-label="Больше">+</button>';
+  const wrap=document.createElement('div'); wrap.className='order'; b.before(wrap); wrap.append(q,b);
+  const it={b,q,n:0}; q.children[0].onclick=()=>set(it,it.n-1); q.children[2].onclick=()=>set(it,it.n+1);
+  b.addEventListener('click',()=>{set(it,1); q.children[2].focus()}); return it;
+});
+function set(it,n){
+  const back=!!it.n && n<=0 && it.q.contains(document.activeElement); it.n=Math.max(0,Math.min(n,20));
+  it.b.setAttribute('aria-pressed',it.n>0);
+  it.b.querySelector('span').textContent=it.n?'В заказе':'В заказ';
+  it.q.children[1].textContent=it.n+' шт'; it.q.classList.toggle('on',it.n>0); if(back) it.b.focus({preventScroll:true});
+  const k=items.reduce((s,i)=>s+i.n,0);
+  counts.forEach(c=>{
+    c.textContent=k; c.classList.toggle('on',k>0);
+    const a=c.parentElement;
+    if(k) a.setAttribute('aria-label',`${a.textContent.replace(/\d+$/,'').trim()}, в заказе ${k} шт`); else a.removeAttribute('aria-label');
+    c.classList.remove('bump'); void c.offsetWidth; if(k) c.classList.add('bump');
+  });
+}
+
+/* smooth anchor jumps (native smooth scroll fights the pinned hero less than CSS) */
+document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{
+  const id=a.getAttribute('href'); const t=id.length>1?document.querySelector(id):document.body;
+  if(!t) return; e.preventDefault();
+  scrollTo({top:id.length>1?t.getBoundingClientRect().top+scrollY:0,behavior:reduce?'auto':'smooth'});
+}));
+
+/* ── scroll engine: pinned hero, depth layers, drifting headlines, inner-image parallax ── */
+const S={active:true};
+(()=>{
+  const wrap=document.querySelector('.hero-wrap'), hero=document.querySelector('.hero');
+  const dock=document.querySelector('.dock'), pct=document.querySelector('.dock__pct'), bar=document.querySelector('.dock__bar i');
+  const layers=[...document.querySelectorAll('[data-speed]')].map(el=>({el,s:+el.dataset.speed,settle:el.hasAttribute('data-settle'),top:0,h:0}));
+  const inners=[...document.querySelectorAll('[data-inner]')];
+  const drifts=[...document.querySelectorAll('[data-drift]')];
+  let vh=innerHeight, H=1, docH=1, endY=1, sy=scrollY, mob=1, pinned=true;
+
+  const absTop=el=>{let t=0;while(el){t+=el.offsetTop;el=el.offsetParent}return t};
+  function measure(){
+    vh=innerHeight; mob=innerWidth<641?0:innerWidth<960?.45:1; pinned=innerWidth>=960;
+    H=wrap.offsetHeight; wrap.style.top=pinned?Math.min(0,vh-H)+'px':'';
+    docH=root.scrollHeight;
+    endY=Math.min(docH-vh,absTop(document.querySelector('.close'))-vh*.2);
+    layers.forEach(l=>{l.top=absTop(l.el);l.h=l.el.offsetHeight});
+    const st=document.querySelector('.stage'), W=st.offsetWidth, Hs=st.offsetHeight;
+    document.querySelectorAll('.co').forEach(co=>{
+      const cs=getComputedStyle(co), v=n=>+cs.getPropertyValue(n);
+      const x1=v('--x')*W/100, y1=v('--y')*Hs/100, dx=v('--tx')*W/100-x1, dy=v('--ty')*Hs/100-y1;
+      const l=co.querySelector('.leader');
+      l.style.left=x1+'px'; l.style.top=y1+'px'; l.style.width=Math.hypot(dx,dy)+'px'; l.style.transform='rotate('+Math.atan2(dy,dx)+'rad)';
+    });
+  }
+  function frame(){
+    const y=scrollY;
+    sy+=(y-sy)*.12; if(Math.abs(y-sy)<.05) sy=y;           // a little inertia
+    const p=Math.min(1,Math.max(0,sy/H));
+    if(!reduce && pinned) hero.style.setProperty('--p',p.toFixed(4));
+    hero.classList.toggle('scrolled',p>.2);
+    S.active=p<.985;
+    if(!reduce){
+      for(const l of layers){
+        let d=(l.top+l.h/2)-(sy+vh/2);
+        if(l.settle) d=Math.max(0,d-vh*.1);   // staggered on the way in, locked to one line once the row is in view
+        l.el.style.setProperty('--ty',(-d*l.s*mob).toFixed(1)+'px');
+      }
+      for(const img of inners){
+        const r=img.parentElement.getBoundingClientRect();
+        if(r.bottom<-100||r.top>vh+100) continue;
+        const t=Math.max(-1,Math.min(1,(r.top+r.height/2-vh/2)/vh));
+        img.style.setProperty('--iy',(t*6).toFixed(2)+'%');
+      }
+      for(const el of drifts){
+        const r=el.parentElement.getBoundingClientRect();
+        if(r.bottom<-200||r.top>vh+200) continue;
+        const t=(r.top+r.height/2-vh/2)/vh;
+        el.style.setProperty('--dx',(t*+el.dataset.drift*innerWidth*.08).toFixed(1)+'px');
+      }
+    }
+    const k=Math.min(1,Math.max(0,y/Math.max(1,endY)));   // 100% once the closing block is in view, then the dock leaves
+    pct.textContent=Math.round(k*100)+'%'; dock.classList.toggle('on',y>140&&y<endY+vh*.08); bar.style.setProperty('--k',k.toFixed(3));
+    requestAnimationFrame(frame);
+  }
+  measure(); addEventListener('resize',measure); addEventListener('load',measure);
+  requestAnimationFrame(frame);
+
+  if(!reduce){
+    const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{rootMargin:'0px 0px -12% 0px'});
+    document.querySelectorAll('[data-reveal],.review').forEach(el=>io.observe(el));
+  }
+})();
+
+/* process stack: cards follow the step that crossed 65% of the viewport; scrolling back removes them */
+(()=>{
+  const stack=document.querySelector('.stack'), cards=[...document.querySelectorAll('.stack__card')], steps=[...document.querySelectorAll('.steps li')];
+  if(!stack||!cards.length||!steps.length) return;
+  let cur=-1;
+  // mobile: each card carries its own step text under the photo (the list itself is hidden there)
+  steps.forEach((li,i)=>{ const c=cards[i]; if(!c) return;
+    const d=document.createElement('div'); d.className='stack__desc';
+    [...li.children].forEach(n=>d.append(n.cloneNode(true)));
+    c.insertBefore(d,c.querySelector('figcaption')); });
+  stack.closest('.process').classList.add('has-desc');
+  function layout(){   // offsets in px: next card starts at 40% of the previous one, group shifted up so the newest fits
+    const S=cards[0].offsetWidth, step=S*.4, H=stack.clientHeight;
+    stack.style.setProperty('--step',step+'px');
+    stack.style.setProperty('--shift',Math.min(0,H-(Math.max(cur,0)*step+S))+'px');
+  }
+  function update(){
+    const line=innerHeight*.65; let a=0;
+    steps.forEach((li,i)=>{ if(li.getBoundingClientRect().top<line) a=i; });
+    a=Math.min(a,cards.length-1);
+    if(a===cur) return; cur=a;
+    cards.forEach((c,i)=>{ c.classList.toggle('on',i<=a); c.style.setProperty('--depth',Math.max(0,a-i)); });
+    layout();
+  }
+  addEventListener('scroll',update,{passive:true}); addEventListener('resize',()=>{layout();update()}); update(); layout();
+
+  // mobile: the stack pins and its cards slide sideways while the page scrolls down
+  const rail=stack.querySelector('.stack__rail'), track=stack.closest('.process'), pin=track.querySelector('.process__pin'), mq=matchMedia('(max-width:960px)');
+  function gallery(){
+    if(!mq.matches){ cards.forEach(c=>c.style.removeProperty('--gx')); return; }
+    const r=track.getBoundingClientRect(), run=Math.max(1,r.height-pin.offsetHeight);
+    const k=Math.min(1,Math.max(0,-r.top/run)), last=cards[cards.length-1];
+    const max=Math.max(0,last.offsetLeft+last.offsetWidth+parseFloat(getComputedStyle(rail).paddingRight)-rail.clientWidth);
+    cards.forEach(c=>c.style.setProperty('--gx',(-k*max).toFixed(1)+'px'));
+  }
+  // texts differ in length: give them one height so the photos above line up
+  const descs=cards.map(c=>c.querySelector('.stack__desc')).filter(Boolean);
+  function fit(){
+    descs.forEach(d=>d.style.minHeight='');
+    if(mq.matches){ const h=Math.max(...descs.map(d=>d.offsetHeight)); descs.forEach(d=>d.style.minHeight=h+'px'); }
+    gallery();
+  }
+  addEventListener('scroll',gallery,{passive:true}); addEventListener('resize',fit); mq.addEventListener('change',fit); fit(); document.fonts?.ready.then(fit);
+})();
+
+/* steam — soft particles rising off an emitter line, nudged by the cursor */
+function steam(cv,emitter,isActive){
+  if(!cv) return;
+  const ctx=cv.getContext('2d');
+  let W=0,H=0,dpr=1,ps=[],last=0,ptr={x:-1e4,y:-1e4},E;
+
+  const spr=document.createElement('canvas'); spr.width=spr.height=128;
+  const sg=spr.getContext('2d'), gr=sg.createRadialGradient(64,64,0,64,64,64);
+  gr.addColorStop(0,'rgba(255,250,242,.9)'); gr.addColorStop(.4,'rgba(255,248,238,.32)'); gr.addColorStop(1,'rgba(255,248,238,0)');
+  sg.fillStyle=gr; sg.fillRect(0,0,128,128);
+
+  function size(){
+    dpr=Math.min(devicePixelRatio||1,1.5);   // soft puffs, no need for full retina
+    W=cv.offsetWidth; H=cv.offsetHeight;
+    cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+    E=emitter(W,H);
+  }
+  function spawn(){
+    const t=Math.random();
+    ps.push({x:E.x0+(E.x1-E.x0)*t, y:E.y+Math.random()*E.k*14,
+      vx:(Math.random()-.5)*.16*E.k, vy:-(.45+Math.random()*.4)*E.k,
+      s:(10+Math.random()*14)*E.k, g:(.10+Math.random()*.12)*E.k,
+      life:0, max:4.2+Math.random()*2.8, ph:Math.random()*6.28, a:.08+Math.random()*.08, rot:Math.random()*6.28});
+  }
+  function step(dt){
+    if(Math.random()<dt*60*.55) spawn();
+    for(const p of ps){
+      p.life+=dt;
+      const sway=Math.sin(p.life*1.3+p.ph)*.28*E.k;
+      p.vy*=.999; p.vx+=sway*.02;
+      const dx=p.x-ptr.x, dy=p.y-ptr.y, d2=dx*dx+dy*dy, R=140*E.k;
+      if(d2<R*R){ const d=Math.sqrt(d2)||1, f=(1-d/R)*.9; p.vx+=dx/d*f; p.vy+=dy/d*f*.6; }
+      p.vx*=.97;
+      p.x+=p.vx*dt*60+sway*dt*60*.25; p.y+=p.vy*dt*60; p.s+=p.g*dt*60; p.rot+=dt*.15;
+    }
+    ps=ps.filter(p=>p.life<p.max && p.y>-200);
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    for(const p of ps){
+      const t=p.life/p.max, fade=(t<.12?t/.12:1)*(1-t)**1.6;   // quick in at the crumb, long thin-out
+      ctx.globalAlpha=p.a*fade;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.scale(1,1.5);
+      ctx.drawImage(spr,-p.s,-p.s,p.s*2,p.s*2); ctx.restore();
+    }
+    ctx.globalAlpha=1;
+  }
+  function loop(ts){
+    const dt=Math.min(.05,(ts-(last||ts))/1000); last=ts;
+    if(isActive()){ step(dt); draw(); }
+    requestAnimationFrame(loop);
+  }
+  function init(){ size(); ps=[]; for(let i=0;i<420;i++) step(1/60); draw(); }
+  init();
+  addEventListener('resize',init);
+  if(reduce) return;
+  addEventListener('pointermove',e=>{const c=cv.getBoundingClientRect(), sx=c.width/W||1; ptr.x=(e.clientX-c.left)/sx; ptr.y=(e.clientY-c.top)/sx;},{passive:true});
+  requestAnimationFrame(loop);
+}
+// hero: the cut face of the top slice, in canvas px (layout boxes, unaffected by transforms)
+(()=>{
+  const cv=document.querySelector('.steam'); if(!cv) return;
+  const stage=cv.parentElement;
+  steam(cv,()=>{ const sw=stage.offsetWidth, sh=stage.offsetHeight;
+    return {x0:cv.offsetLeft*-1+sw*.22, x1:cv.offsetLeft*-1+sw*.70, y:-cv.offsetTop+sh*.12, k:sw/430}; },()=>S.active);
+})();
+// closing block: a wide band under the headline, only while the block is on screen
+(()=>{
+  const cv=document.querySelector('.close__steam'); if(!cv) return;
+  let on=false; new IntersectionObserver(es=>{on=es[0].isIntersecting}).observe(cv);
+  steam(cv,(W,H)=>({x0:W*.3, x1:W*.7, y:H*.62, k:Math.min(W,1300)/700}),()=>on);
+})();
+</script>
+</body>
+</html>

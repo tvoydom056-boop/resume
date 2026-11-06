@@ -53,6 +53,9 @@ html.motion .s-trial:not(.visible) h2 span{rotate:-12deg;scale:.6;opacity:0}
 .sense dialog{width:min(560px,calc(100vw - 32px));padding:0;border-radius:34px;background:#202020;color:#fff;border:1px solid #ffffff22;box-shadow:0 0 0 6px #edc3f7,0 30px 80px #000a}
 .sense dialog .dlg-body{position:relative;padding:26px 26px 24px}
 .sense dialog .close{position:absolute;top:38px;right:38px;z-index:2;margin:0;border:0;background:#d8fa38;color:#202020;transition:transform .35s var(--ease)}
+.sense dialog .close{font-size:0;line-height:0;padding:0}
+.sense dialog .close::before,.sense dialog .close::after{content:"";position:absolute;top:50%;left:50%;width:14px;height:2px;border-radius:1px;background:currentColor;transform:translate(-50%,-50%) rotate(45deg)}
+.sense dialog .close::after{transform:translate(-50%,-50%) rotate(-45deg)}
 .sense dialog .close:hover{transform:rotate(90deg) scale(1.08)}
 .sense .dlg-count{top:38px;left:38px;z-index:2;opacity:1;color:#d8fa38;background:#202020c4;padding:6px 12px;border-radius:20px;backdrop-filter:blur(4px)}
 .sense dialog .dialog-photo{aspect-ratio:4/3;border-radius:24px;filter:saturate(1.15)}
