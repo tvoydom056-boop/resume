@@ -31,7 +31,7 @@ body.fleur{background:#e6e3da}.f-page{max-width:1600px;margin:auto;background:va
 .f-brand-panel>.hand{bottom:46px;left:34px}
 .f-world{padding:74px 28px 60px 38px}
 .f-shop{padding:120px 3.5% 130px;gap:34px 20px;min-height:0}
-.f-shop-heading{grid-row:span 2;padding-top:30px}
+.f-shop-heading{grid-row:span 3;padding-top:30px}
 .f-footer{padding:100px 4% 44px}
 .f-newsletter{min-height:250px}
 .f-footer .site-footline{padding-top:34px;margin-top:44px}
@@ -80,6 +80,7 @@ body.fleur{background:#e6e3da}.f-page{max-width:1600px;margin:auto;background:va
 
 /* ===== Новые карточки в магазине ===== */
 .f-product-photo.v2{background-image:url('fashion-products-2.webp')}
+.f-product-photo.v3{background-image:url('fashion-products-3.webp')}
 .f-product{position:relative}
 .f-product-badge{position:absolute;top:18px;left:-7px;z-index:2;background:var(--lime);font-size:9px;text-transform:uppercase;letter-spacing:.08em;padding:5px 10px;transform:rotate(-6deg);box-shadow:2px 2px 0 #1c1d1b24;pointer-events:none}
 
