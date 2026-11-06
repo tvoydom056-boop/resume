@@ -1,0 +1,215 @@
+{
+  "method": "Per-cell border-plane RGB distance >32; 5px median; row/column support >1%. Width x height percent of a square cell. Includes opaque product and strongest contact shadow; no CSS scaling.",
+  "reference": {
+    "file": "three-landings\\assets\\fashion-products.webp",
+    "size": [
+      1254,
+      1254
+    ],
+    "cells": [
+      {
+        "q": "q1",
+        "bbox": [
+          38,
+          195,
+          573,
+          510
+        ],
+        "width_pct": 85.3,
+        "height_pct": 50.2
+      },
+      {
+        "q": "q2",
+        "bbox": [
+          67,
+          38,
+          528,
+          579
+        ],
+        "width_pct": 73.5,
+        "height_pct": 86.3
+      },
+      {
+        "q": "q3",
+        "bbox": [
+          74,
+          43,
+          544,
+          602
+        ],
+        "width_pct": 75.0,
+        "height_pct": 89.2
+      },
+      {
+        "q": "q4",
+        "bbox": [
+          66,
+          136,
+          556,
+          516
+        ],
+        "width_pct": 78.1,
+        "height_pct": 60.6
+      }
+    ]
+  },
+  "row2_before": {
+    "file": "three-landings\\assets\\fashion-products-2.webp",
+    "size": [
+      1254,
+      1254
+    ],
+    "cells": [
+      {
+        "q": "q1",
+        "bbox": [
+          124,
+          209,
+          517,
+          455
+        ],
+        "width_pct": 62.7,
+        "height_pct": 39.2
+      },
+      {
+        "q": "q2",
+        "bbox": [
+          155,
+          114,
+          461,
+          491
+        ],
+        "width_pct": 48.8,
+        "height_pct": 60.1
+      },
+      {
+        "q": "q3",
+        "bbox": [
+          149,
+          119,
+          482,
+          498
+        ],
+        "width_pct": 53.1,
+        "height_pct": 60.4
+      },
+      {
+        "q": "q4",
+        "bbox": [
+          137,
+          169,
+          480,
+          435
+        ],
+        "width_pct": 54.7,
+        "height_pct": 42.4
+      }
+    ]
+  },
+  "row2_after": {
+    "file": "three-landings\\assets\\fashion-products-2.webp",
+    "size": [
+      2048,
+      2048
+    ],
+    "cells": [
+      {
+        "q": "q1",
+        "bbox": [
+          75,
+          316,
+          943,
+          833
+        ],
+        "width_pct": 84.8,
+        "height_pct": 50.5
+      },
+      {
+        "q": "q2",
+        "bbox": [
+          113,
+          57,
+          865,
+          947
+        ],
+        "width_pct": 73.4,
+        "height_pct": 86.9
+      },
+      {
+        "q": "q3",
+        "bbox": [
+          128,
+          64,
+          893,
+          981
+        ],
+        "width_pct": 74.7,
+        "height_pct": 89.6
+      },
+      {
+        "q": "q4",
+        "bbox": [
+          112,
+          220,
+          913,
+          841
+        ],
+        "width_pct": 78.2,
+        "height_pct": 60.6
+      }
+    ]
+  },
+  "row3": {
+    "file": "three-landings\\assets\\fashion-products-3.webp",
+    "size": [
+      2048,
+      2048
+    ],
+    "cells": [
+      {
+        "q": "q1",
+        "bbox": [
+          116,
+          182,
+          918,
+          818
+        ],
+        "width_pct": 78.3,
+        "height_pct": 62.1
+      },
+      {
+        "q": "q2",
+        "bbox": [
+          95,
+          176,
+          926,
+          881
+        ],
+        "width_pct": 81.2,
+        "height_pct": 68.8
+      },
+      {
+        "q": "q3",
+        "bbox": [
+          186,
+          55,
+          844,
+          875
+        ],
+        "width_pct": 64.3,
+        "height_pct": 80.1
+      },
+      {
+        "q": "q4",
+        "bbox": [
+          88,
+          234,
+          903,
+          794
+        ],
+        "width_pct": 79.6,
+        "height_pct": 54.7
+      }
+    ]
+  }
+}

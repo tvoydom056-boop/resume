@@ -107,3 +107,39 @@ Use case: photorealistic-natural. Asset: kyoto-bike.webp. One landscape 3:2 cand
 ASSET: assets/fashion-detail.webp
 SOURCE: image-sources/fleur/fashion-detail.png
 Use case: photorealistic-natural. Asset: fashion-detail.webp, a landscape 3:2 close-up fashion editorial photograph for a small polaroid on a pastel travel fashion website. Attached fashion-hero.webp is reference for exact powder-blue cardigan, cream shirt, young adult Black male model, vintage honey-tan suitcase and warm soft analog photographic style. New crop and new camera viewpoint: close detail from chest to upper thigh, face outside frame. Emphasize tactile pale blue knit sleeve and cream buttons, dark tailored trousers, model's natural hand gently holding the tan leather suitcase handle. Suitcase occupies lower right, knit sleeve and cream shirt occupy center-left, pale coastal sky and cream stucco softly blurred behind. Composed to read clearly at small size and within a short wide crop, main hand, handle and knit detail centered vertically. Authentic skin and leather patina, warm side daylight, subtle medium-format film texture, dreamy summer palette. No text, logos, letters, watermark, borders, collage or UI. One real photographic scene, aim for 1536x1024.
+
+
+===== FLEUR SHOP ROW 2 / ROW 3 — 2026-11-06 =====
+Generated with built-in ImageGen; no API/CLI fallback.
+Original PNG files: image-sources/fleur/fashion-products-2.png and fashion-products-3.png.
+ImageGen returned 1254x1254 PNG despite the requested 2048x2048 output. Originals are retained unchanged. Delivery WebP files are Lanczos exports at 2048x2048, RGB, quality=85, method=6; this is an upscale, not additional native detail.
+The existing first sheet is the series reference and is unchanged. A temporary 2048px Lanczos reference was used for the final row-2 call.
+
+ASSET: assets/fashion-products-2.webp
+SOURCE: image-sources/fleur/fashion-products-2.png
+FINAL PROMPT:
+Use case: product-mockup. Asset: replacement fashion-products-2.webp for an existing product catalog. Generate a 2048x2048 square photographic contact sheet. The supplied image fashion-products.webp is the exact series reference; match its product silhouettes, camera heights, angles, scale and soft warm light. Exactly 2x2 equal square cells, boundaries x=1024,y=1024, no borders, gutters, dividers or seams. Each product centered in its cell and entirely contained.
+TOP LEFT: the same pair of low-top suede sneakers as reference in blush pink, white rubber soles, white laces and small cream flower patch; same overlapping pair and three-quarter side view. Pair fills 84-86% cell width and about 50-55% cell height.
+TOP RIGHT: same curved leather shoulder bag and handle, now tangerine orange with large cream flower applique, same frontal angle; fills 76-80% width and 84-88% height INCLUDING handle.
+BOTTOM LEFT: same button-up round-neck knitted cardigan on invisible mannequin, front view, now mint green, cream buttons; fills 76-80% width and 86-89% height.
+BOTTOM RIGHT: same baseball cap in powder blue with embroidered cream daisy and yellow center, three-quarter view with brim extending lower left; fills 80-84% width and 60-65% height.
+Critical: products must be LARGE, matching the reference, never miniature with excessive whitespace. Keep natural aspect ratios. About 8-10% horizontal margins, vertical margins depend on natural product shape. Identical warm ivory #f3eee5 matte paper background across sheet, soft natural studio lighting from upper left and delicate contact shadows, authentic premium catalog photography, real leather/suede/knit texture. No text, logos, people, visible mannequins, watermarks, props or extra products. Do not create website UI.
+Output must retain the supplied reference's 2048x2048 resolution. Cardigan is cool pale MINT (blue-green, not yellow sage). Keep the same scale as reference; 75% width and 88% height for cardigan.
+
+ASSET: assets/fashion-products-3.webp
+SOURCE: image-sources/fleur/fashion-products-3.png
+INITIAL PROMPT:
+Use case: product-mockup. Create a NEW 2048 by 2048 pixel square photographic catalog contact sheet for fashion-products-3. Attached reference fashion-products.webp determines only lighting, warm color, camera angle and scale; all FOUR subjects must be DIFFERENT from reference. Mathematically equal 2x2 grid with square cells, no borders, gutters, gaps or visible dividing lines. Continuous warm ivory #f3eee5 matte paper backdrop. Every product centered, fully inside its cell, LARGE scale with 8-10% margins on its main axis, not a tiny object surrounded by blank paper.
+TOP LEFT: cream woven straw bucket hat with pale powder-blue ribbon, three-quarter view, authentic fine straw weave; 82-85% of cell width and 65-75% height.
+TOP RIGHT: a sky-blue silk bandana with tiny cream daisies and yellow centers and a delicate yellow edge, laid flat in a slightly draped broad triangular fold, fabric's silk sheen, whole scarf visible, no knot; 80-84% width and 72-80% height.
+BOTTOM LEFT: a natural cream canvas tote bag with pale blue handles and one embroidered cream daisy with yellow center and small green stem on its front, front view, handles upright and completely in frame, no writing; 75-80% width, 84-88% height including handles.
+BOTTOM RIGHT: a PAIR of cream leather ballet flats each with a small cream bow, arranged together in a pleasing overlapping three-quarter view like the sneaker pair reference, toes pointing lower right, entire pair visible, fine leather texture; 82-86% width and 65-75% height.
+Match the reference's authentic premium studio product photography with soft warm natural light from upper left, subtle contact shadows and real fine material texture. No people, hands, visible mannequins, props, text, letters, numbers, logos, watermark, prices or UI. Exactly four product groups in equal independent square quadrants. Output image resolution 2048x2048 or greater.
+
+FINAL SCALE REFINEMENT PROMPT (input: the initial row-3 output):
+Use case: precise-object-edit. Edit target: supplied fashion-products-3 contact sheet. Keep the same four items, color, lighting, material texture, camera angles, photorealism and equal 2x2 square cells with no dividers. Correct only scale and centering: reduce straw hat width from 89% to 82% of top-left cell; reduce blue/yellow silk daisy bandana width from 93% to 82% of top-right cell; reduce cream canvas flower tote height including handles from 90% to 84% of bottom-left cell and center it vertically, so its top handle has 8% clearance from cell top; reduce cream leather ballet flats pair width from 91% to 83% of bottom-right cell. All groups centered exactly, whole objects visible. Preserve each object's natural proportions. Fill the newly opened margins with matching continuous warm ivory #f3eee5 matte paper. Soft contact shadows. Exactly 4 product groups. No text, people, logos, borders, gaps or watermarks. Desired output 2048x2048 pixels.
+
+VALIDATION:
+Reproducible Pillow/numpy measurements: image-sources/fleur/measure-products.py.
+Exact bbox coordinates and percentage results: image-sources/fleur/product-scale.json.
+Background uses a border-fitted warm-paper plane (the source series has a natural light gradient), RGB distance >32, median filter 5px, rows/columns with >1% foreground. This avoids treating softly lit paper as product. Ratios include the strongest contact shadows. Natural aspect ratios retained: sneakers/caps are wider than tall.
